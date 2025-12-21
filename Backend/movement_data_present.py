@@ -111,10 +111,12 @@ for row in range(heatmap.shape[0]):
 
 heatmap_frame = cv2.addWeighted(heatmap, 0.75, heatmap_frame, 0.25, 1)
 
-cv2.imshow("Movement Tracks", tracks_frame)
-cv2.imshow("Stationary Location Heatmap", heatmap_frame)
-cv2.waitKey()
-cv2.destroyAllWindows()
+# Save images instead of showing GUI windows
+cv2.imwrite('processed_data/movement_tracks.png', tracks_frame)
+cv2.imwrite('processed_data/heatmap.png', heatmap_frame)
+print("Movement tracks saved to: processed_data/movement_tracks.png")
+print("Heatmap saved to: processed_data/heatmap.png")
+
 cap.release()
 
     

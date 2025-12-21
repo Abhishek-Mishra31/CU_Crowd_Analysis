@@ -54,6 +54,13 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 		DATA_RECORD_FRAME = int(VID_FPS / DATA_RECORD_RATE)
 		TIME_STEP = DATA_RECORD_FRAME/VID_FPS
 
+	# Initialize VideoWriter to save processed video for web display
+	output_video_path = 'processed_data/processed_video.mp4'
+	fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+	# We'll initialize the VideoWriter after we get the first frame to know the dimensions
+	out = None
+	first_frame = True
+
 	frame_count = 0
 	display_frame_count = 0
 	re_warning_timeout = 0
@@ -89,6 +96,14 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 
 		# Resize Frame to given size
 		frame = imutils.resize(frame, width=frame_size)
+
+		# Initialize VideoWriter on first frame (now we know the dimensions)
+		if first_frame and not IS_CAM:
+			height, width = frame.shape[:2]
+			out = cv2.VideoWriter(output_video_path, fourcc, VID_FPS, (width, height))
+			first_frame = False
+			print(f"Initializing processed video output: {output_video_path}")
+			print(f"Video dimensions: {width}x{height}, FPS: {VID_FPS}")
 
 		# Get current time
 		current_datetime = datetime.datetime.now()
@@ -242,6 +257,10 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 		else:
 			progress(display_frame_count)
 
+		# Write frame to output video file for web display
+		if out is not None:
+			out.write(frame)
+
 		# Press 'Q' to stop the video display
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			# Record the movement when video ends
@@ -250,6 +269,11 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 			if not VID_FPS:
 				_calculate_FPS()
 			break
+	
+	# Release VideoWriter and save processed video
+	if out is not None:
+		out.release()
+		print(f"Processed video saved to: {output_video_path}")
 	
 	cv2.destroyAllWindows()
 	return VID_FPS

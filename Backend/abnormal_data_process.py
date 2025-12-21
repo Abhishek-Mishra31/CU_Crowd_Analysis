@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('tkagg')
+matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
 import csv
 import json
@@ -78,7 +78,10 @@ plt.title('Distribution of energies level')
 plt.xlabel('Energy level')
 plt.ylabel('Count')
 
-plt.show()
+# Save plot as image instead of showing GUI window
+plt.savefig('processed_data/energy_distribution.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("Energy distribution plot saved to: processed_data/energy_distribution.png")
 
 while df.skew()[0] > 7.5:
     print()
@@ -101,4 +104,7 @@ while df.skew()[0] > 7.5:
     plt.xlabel('Energy level')
     plt.ylabel('Count')
 
-    plt.show()
+    # Save cleaned plot as image
+    plt.savefig('processed_data/energy_distribution_cleaned.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("Cleaned energy distribution plot saved to: processed_data/energy_distribution_cleaned.png")
