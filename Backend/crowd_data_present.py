@@ -8,6 +8,7 @@ import json
 import datetime
 from math import floor
 
+# try block to handle exception
 try:
     human_count = []
     violate_count = []
