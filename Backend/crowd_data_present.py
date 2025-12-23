@@ -6,7 +6,12 @@ import matplotlib.dates as mdates
 import csv
 import json
 import datetime
+import sys
+import os
 from math import floor
+
+# Accept output directory from command line for concurrent processing
+output_dir = sys.argv[1] if len(sys.argv) > 1 else 'processed_data'
 
 # try block to handle exception
 try:
@@ -15,7 +20,8 @@ try:
     restricted_entry = []
     abnormal_activity = []
     
-    with open('processed_data/crowd_data.csv', 'r') as file:
+    crowd_data_path = os.path.join(output_dir, 'crowd_data.csv')
+    with open(crowd_data_path, 'r') as file:
         reader = csv.reader(file, delimiter=',')
         next(reader)  # Skip header
         for row in reader:
@@ -30,7 +36,8 @@ try:
         print("No crowd data available to visualize")
         exit(0)
     
-    with open('processed_data/video_data.json', 'r') as file:
+    video_data_path = os.path.join(output_dir, 'video_data.json')
+    with open(video_data_path, 'r') as file:
         data = json.load(file)
         data_record_frame = data["DATA_RECORD_FRAME"]
         is_cam = data["IS_CAM"]
@@ -68,7 +75,8 @@ try:
     plt.tight_layout()
     
     # Save plot as image instead of showing GUI window
-    plt.savefig('processed_data/crowd_analysis.png', dpi=150, bbox_inches='tight')
+    output_image_path = os.path.join(output_dir, 'crowd_analysis.png')
+    plt.savefig(output_image_path, dpi=150, bbox_inches='tight')
     plt.close()
     print("Crowd analysis plot saved to: processed_data/crowd_analysis.png")
 

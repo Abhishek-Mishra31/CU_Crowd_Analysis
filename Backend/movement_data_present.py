@@ -3,6 +3,8 @@ import imutils
 import cv2
 import json
 import math
+import sys
+import os
 import numpy as np
 from config import VIDEO_CONFIG
 from itertools import zip_longest
@@ -10,8 +12,13 @@ from math import ceil
 from scipy.spatial.distance import euclidean
 from colors import RGB_COLORS, gradient_color_RGB
 
+# Accept output directory from command line for concurrent processing
+output_dir = sys.argv[1] if len(sys.argv) > 1 else 'processed_data'
+video_path = sys.argv[2] if len(sys.argv) > 2 else VIDEO_CONFIG["VIDEO_CAP"]
+
 tracks = []
-with open('processed_data/movement_data.csv', 'r') as file:
+movement_data_path = os.path.join(output_dir, 'movement_data.csv')
+with open(movement_data_path, 'r') as file:
     reader = csv.reader(file, delimiter=',')
     for row in reader:
         if len(row[3:]) > 4:
@@ -21,13 +28,14 @@ with open('processed_data/movement_data.csv', 'r') as file:
                 temp.append([int(data[i]), int(data[i+1])])
             tracks.append(temp)
 
-with open('processed_data/video_data.json', 'r') as file:
+video_data_path = os.path.join(output_dir, 'video_data.json')
+with open(video_data_path, 'r') as file:
 	data = json.load(file)
 	vid_fps = data["VID_FPS"]
 	data_record_frame = data["DATA_RECORD_FRAME"]
 	frame_size = data["PROCESSED_FRAME_SIZE"]
 
-cap = cv2.VideoCapture(VIDEO_CONFIG["VIDEO_CAP"])
+cap = cv2.VideoCapture(video_path)
 cap.set(1, 100)
 (ret, tracks_frame) = cap.read()
 tracks_frame = imutils.resize(tracks_frame, width=frame_size)
@@ -112,8 +120,10 @@ for row in range(heatmap.shape[0]):
 heatmap_frame = cv2.addWeighted(heatmap, 0.75, heatmap_frame, 0.25, 1)
 
 # Save images instead of showing GUI windows
-cv2.imwrite('processed_data/movement_tracks.png', tracks_frame)
-cv2.imwrite('processed_data/heatmap.png', heatmap_frame)
+tracks_output_path = os.path.join(output_dir, 'movement_tracks.png')
+heatmap_output_path = os.path.join(output_dir, 'heatmap.png')
+cv2.imwrite(tracks_output_path, tracks_frame)
+cv2.imwrite(heatmap_output_path, heatmap_frame)
 print("Movement tracks saved to: processed_data/movement_tracks.png")
 print("Heatmap saved to: processed_data/heatmap.png")
 

@@ -5,6 +5,7 @@ import json
 import csv
 import subprocess
 import shutil
+import uuid
 from werkzeug.utils import secure_filename
 from pathlib import Path
 
@@ -69,44 +70,31 @@ def analyze_video():
     if not os.path.exists(video_path):
         return jsonify({'error': f'Video file not found: {filename}'}), 404
     
-    # Update config.py to use the uploaded video
-    config_path = 'config.py'
+    # Generate unique request ID for concurrent processing
+    request_id = str(uuid.uuid4())
+    output_dir = os.path.join(PROCESSED_FOLDER, request_id)
+    
+    # Create request-specific output directory
+    os.makedirs(output_dir, exist_ok=True)
+    
+    print(f"Starting analysis for request: {request_id}")
+    print(f"Video: {video_path}")
+    print(f"Output directory: {output_dir}")
     
     try:
-        with open(config_path, 'r') as f:
-            original_config = f.read()
-        
-        # Backup original config
-        with open('config_backup.py', 'w') as f:
-            f.write(original_config)
-        
-        # Normalize path for cross-platform compatibility
-        video_path_normalized = video_path.replace('\\', '/')
-        
-        # Update config with new video path
-        updated_config = original_config.replace(
-            '"VIDEO_CAP" : "video.mp4"',
-            f'"VIDEO_CAP" : "{video_path_normalized}"'
-        )
-        
-        with open(config_path, 'w') as f:
-            f.write(updated_config)
-        
-        # Run the analysis
+        # Run analysis with video path and output directory as command-line arguments
+        # No config file modification needed!
         result = subprocess.run(
-            ['python', 'main.py'],
+            ['python', 'main.py', video_path, output_dir],
             capture_output=True,
             text=True,
             timeout=300
         )
         
-        # Restore original config
-        with open('config_backup.py', 'r') as f:
-            original = f.read()
-        with open(config_path, 'w') as f:
-            f.write(original)
-        
         if result.returncode != 0:
+            print(f"ERROR: Analysis failed with return code {result.returncode}")
+            print(f"STDERR: {result.stderr}")
+            print(f"STDOUT: {result.stdout}")
             return jsonify({
                 'error': 'Analysis failed',
                 'details': result.stderr
@@ -116,28 +104,43 @@ def analyze_video():
         print("Generating visualization plots...")
         try:
             # Generate crowd analysis plot
-            result_viz = subprocess.run(['python', 'crowd_data_present.py'], 
+            print("Running crowd_data_present.py...")
+            result_viz = subprocess.run(['python', 'crowd_data_present.py', output_dir], 
                          capture_output=True, text=True, timeout=30)
             if result_viz.returncode != 0:
-                print(f"Crowd analysis plot error: {result_viz.stderr}")
+                print(f"Crowd analysis plot error (returncode={result_viz.returncode}):")
+                print(f"STDERR: {result_viz.stderr}")
+                print(f"STDOUT: {result_viz.stdout}")
+            else:
+                print(f"Crowd analysis plot generated successfully")
         except Exception as e:
             print(f"Warning: Could not generate crowd analysis plot: {e}")
         
         try:
             # Generate movement heatmap and tracks
-            result_viz = subprocess.run(['python', 'movement_data_present.py'], 
+            print("Running movement_data_present.py...")
+            result_viz = subprocess.run(['python', 'movement_data_present.py', output_dir, video_path], 
                          capture_output=True, text=True, timeout=30)
             if result_viz.returncode != 0:
-                print(f"Movement visualization error: {result_viz.stderr}")
+                print(f"Movement visualization error (returncode={result_viz.returncode}):")
+                print(f"STDERR: {result_viz.stderr}")
+                print(f"STDOUT: {result_viz.stdout}")
+            else:
+                print(f"Movement visualizations generated successfully")
         except Exception as e:
             print(f"Warning: Could not generate movement visualizations: {e}")
         
         try:
             # Generate energy distribution plot
-            result_viz = subprocess.run(['python', 'abnormal_data_process.py'], 
+            print("Running abnormal_data_process.py...")
+            result_viz = subprocess.run(['python', 'abnormal_data_process.py', output_dir], 
                          capture_output=True, text=True, timeout=30)
             if result_viz.returncode != 0:
-                print(f"Energy distribution error: {result_viz.stderr}")
+                print(f"Energy distribution error (returncode={result_viz.returncode}):")
+                print(f"STDERR: {result_viz.stderr}")
+                print(f"STDOUT: {result_viz.stdout}")
+            else:
+                print(f"Energy distribution plot generated successfully")
         except Exception as e:
             print(f"Warning: Could not generate energy distribution plot: {e}")
         
@@ -145,11 +148,12 @@ def analyze_video():
 
         # Read and return analysis results
         print("Calling get_analysis_results()...")
-        analysis_data = get_analysis_results()
+        analysis_data = get_analysis_results(request_id)
         
         print("Creating response JSON...")
         response_data = {
             'success': True,
+            'request_id': request_id,
             'filename': filename,
             'data': analysis_data
         }
@@ -164,35 +168,22 @@ def analyze_video():
         return response
     
     except subprocess.TimeoutExpired:
-        # Restore config on timeout
-        try:
-            with open('config_backup.py', 'r') as f:
-                original = f.read()
-            with open(config_path, 'w') as f:
-                f.write(original)
-        except:
-            pass
         return jsonify({'error': 'Analysis timeout (exceeded 5 minutes)'}), 500
     
     except Exception as e:
-        # Restore config on error
         print(f"EXCEPTION CAUGHT: {type(e).__name__}: {str(e)}")
         import traceback
         print("Full traceback:")
         traceback.print_exc()
-        
-        try:
-            with open('config_backup.py', 'r') as f:
-                original = f.read()
-            with open(config_path, 'w') as f:
-                f.write(original)
-        except:
-            pass
         return jsonify({'error': f'Analysis error: {str(e)}'}), 500
 
 
-def get_analysis_results():
+def get_analysis_results(request_id):
     print("Starting get_analysis_results()...")
+    
+    # Use request-specific output directory
+    output_dir = os.path.join(PROCESSED_FOLDER, request_id)
+    
     results = {
         'video_data': {},
         'crowd_data': [],
@@ -202,7 +193,7 @@ def get_analysis_results():
     
     # Read video data
     print("Reading video data...")
-    video_data_path = os.path.join(PROCESSED_FOLDER, 'video_data.json')
+    video_data_path = os.path.join(output_dir, 'video_data.json')
     if os.path.exists(video_data_path):
         try:
             with open(video_data_path, 'r') as f:
@@ -213,7 +204,7 @@ def get_analysis_results():
     
     # Read crowd data
     print("Reading crowd data...")
-    crowd_data_path = os.path.join(PROCESSED_FOLDER, 'crowd_data.csv')
+    crowd_data_path = os.path.join(output_dir, 'crowd_data.csv')
     if os.path.exists(crowd_data_path):
         try:
             with open(crowd_data_path, 'r') as f:
@@ -230,7 +221,7 @@ def get_analysis_results():
     
     # Read movement data
     print("Reading movement data...")
-    movement_data_path = os.path.join(PROCESSED_FOLDER, 'movement_data.csv')
+    movement_data_path = os.path.join(output_dir, 'movement_data.csv')
     if os.path.exists(movement_data_path):
         try:
             with open(movement_data_path, 'r') as f:
@@ -304,7 +295,12 @@ def get_results():
 @app.route('/api/visualizations/heatmap', methods=['GET'])
 def get_heatmap():
     """Get the heatmap visualization image"""
-    heatmap_path = os.path.join(PROCESSED_FOLDER, 'heatmap.png')
+    request_id = request.args.get('request_id', 'latest')
+    if request_id == 'latest':
+        # For backward compatibility, look in root processed_data folder
+        heatmap_path = os.path.join(PROCESSED_FOLDER, 'heatmap.png')
+    else:
+        heatmap_path = os.path.join(PROCESSED_FOLDER, request_id, 'heatmap.png')
     if os.path.exists(heatmap_path):
         return send_file(heatmap_path, mimetype='image/png')
     return jsonify({'error': 'Heatmap not available'}), 404
@@ -312,7 +308,11 @@ def get_heatmap():
 @app.route('/api/visualizations/movement-tracks', methods=['GET'])
 def get_movement_tracks():
     """Get the movement tracks visualization image"""
-    tracks_path = os.path.join(PROCESSED_FOLDER, 'movement_tracks.png')
+    request_id = request.args.get('request_id', 'latest')
+    if request_id == 'latest':
+        tracks_path = os.path.join(PROCESSED_FOLDER, 'movement_tracks.png')
+    else:
+        tracks_path = os.path.join(PROCESSED_FOLDER, request_id, 'movement_tracks.png')
     if os.path.exists(tracks_path):
         return send_file(tracks_path, mimetype='image/png')
     return jsonify({'error': 'Movement tracks not available'}), 404
@@ -320,7 +320,11 @@ def get_movement_tracks():
 @app.route('/api/visualizations/crowd-analysis', methods=['GET'])
 def get_crowd_analysis():
     """Get the crowd analysis plot image"""
-    crowd_path = os.path.join(PROCESSED_FOLDER, 'crowd_analysis.png')
+    request_id = request.args.get('request_id', 'latest')
+    if request_id == 'latest':
+        crowd_path = os.path.join(PROCESSED_FOLDER, 'crowd_analysis.png')
+    else:
+        crowd_path = os.path.join(PROCESSED_FOLDER, request_id, 'crowd_analysis.png')
     if os.path.exists(crowd_path):
         return send_file(crowd_path, mimetype='image/png')
     return jsonify({'error': 'Crowd analysis plot not available'}), 404
@@ -328,7 +332,14 @@ def get_crowd_analysis():
 @app.route('/api/visualizations/energy-distribution', methods=['GET'])
 def get_energy_distribution():
     """Get the energy distribution plot image"""
-    energy_path = os.path.join(PROCESSED_FOLDER, 'energy_distribution.png')
+    request_id = request.args.get('request_id', 'latest')
+    if request_id == 'latest':
+        energy_path = os.path.join(PROCESSED_FOLDER, 'energy_distribution.png')
+    else:
+        energy_path = os.path.join(PROCESSED_FOLDER, request_id, 'energy_distribution_cleaned.png')
+        # Fallback to non-cleaned version if cleaned doesn't exist
+        if not os.path.exists(energy_path):
+            energy_path = os.path.join(PROCESSED_FOLDER, request_id, 'energy_distribution.png')
     if os.path.exists(energy_path):
         return send_file(energy_path, mimetype='image/png')
     return jsonify({'error': 'Energy distribution plot not available'}), 404
@@ -347,7 +358,11 @@ def list_visualizations():
 @app.route('/api/processed-video', methods=['GET'])
 def get_processed_video():
     """Serve the processed video with annotations (bounding boxes, tracking, etc.)"""
-    video_path = os.path.join(PROCESSED_FOLDER, 'processed_video.mp4')
+    request_id = request.args.get('request_id', 'latest')
+    if request_id == 'latest':
+        video_path = os.path.join(PROCESSED_FOLDER, 'processed_video.mp4')
+    else:
+        video_path = os.path.join(PROCESSED_FOLDER, request_id, 'processed_video.mp4')
     if os.path.exists(video_path):
         return send_file(video_path, mimetype='video/mp4')
     return jsonify({'error': 'Processed video not available'}), 404

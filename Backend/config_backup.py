@@ -9,7 +9,6 @@ VIDEO_CONFIG = {
 	"START_TIME": datetime.datetime(2020, 11, 5, 0, 0, 0, 0)
 }
 
-
 # Load YOLOv3-tiny weights and config
 YOLO_CONFIG = {
 	"WEIGHTS_PATH" : "YOLOv4-tiny/yolov4-tiny.weights",

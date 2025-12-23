@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import imutils
 import cv2
+import os
 import time
 from math import ceil
 from scipy.spatial.distance import euclidean
@@ -39,7 +40,7 @@ def _end_video(tracker, frame_count, movement_data_writer):
 			_record_movement_data(movement_data_writer, t)
 		
 
-def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writer, crowd_data_writer):
+def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writer, crowd_data_writer, output_dir='processed_data'):
 	def _calculate_FPS():
 		t1 = time.time() - t0
 		VID_FPS = frame_count / t1
@@ -55,8 +56,22 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 		TIME_STEP = DATA_RECORD_FRAME/VID_FPS
 
 	# Initialize VideoWriter to save processed video for web display
-	output_video_path = 'processed_data/processed_video.mp4'
-	fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+	output_video_path = os.path.join(output_dir, 'processed_video.mp4')
+	# Try multiple codecs for best browser compatibility
+	# H.264 (best) -> XVID (good) -> mp4v (fallback)
+	codecs_to_try = ['avc1', 'H264', 'X264', 'XVID', 'mp4v']
+	fourcc = None
+	for codec in codecs_to_try:
+		try:
+			test_fourcc = cv2.VideoWriter_fourcc(*codec)
+			fourcc = test_fourcc
+			print(f"Using video codec: {codec}")
+			break
+		except:
+			continue
+	if fourcc is None:
+		fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Ultimate fallback
+		print("Using fallback codec: mp4v")
 	# We'll initialize the VideoWriter after we get the first frame to know the dimensions
 	out = None
 	first_frame = True

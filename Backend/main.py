@@ -13,6 +13,7 @@ import numpy as np
 import imutils
 import cv2
 import os
+import sys
 import csv
 import json
 from video_process import video_process
@@ -21,9 +22,21 @@ from deep_sort.detection import Detection
 from deep_sort.tracker import Tracker
 from deep_sort import generate_detections as gdet
 
+# Accept video path and output directory from command line for concurrent processing
+if len(sys.argv) >= 3:
+    VIDEO_PATH = sys.argv[1]
+    OUTPUT_DIR = sys.argv[2]
+    print(f"Processing video: {VIDEO_PATH}")
+    print(f"Output directory: {OUTPUT_DIR}")
+else:
+    # Fallback to config for standalone usage
+    VIDEO_PATH = VIDEO_CONFIG["VIDEO_CAP"]
+    OUTPUT_DIR = 'processed_data'
+    print("Using config file settings (standalone mode)")
+
 # Read from video
 IS_CAM = VIDEO_CONFIG["IS_CAM"]
-cap = cv2.VideoCapture(VIDEO_CONFIG["VIDEO_CAP"])
+cap = cv2.VideoCapture(VIDEO_PATH)
 
 # Load YOLOv3-tiny weights and config
 WEIGHTS_PATH = YOLO_CONFIG["WEIGHTS_PATH"]
@@ -56,11 +69,16 @@ encoder = gdet.create_box_encoder(model_filename, batch_size=1)
 metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
 tracker = Tracker(metric, max_age=max_age)
 
-if not os.path.exists('processed_data'):
-	os.makedirs('processed_data')
+# Create output directory if it doesn't exist
+if not os.path.exists(OUTPUT_DIR):
+	os.makedirs(OUTPUT_DIR)
 
-movement_data_file = open('processed_data/movement_data.csv', 'w') 
-crowd_data_file = open('processed_data/crowd_data.csv', 'w')
+# Use OUTPUT_DIR for all file paths
+movement_data_path = os.path.join(OUTPUT_DIR, 'movement_data.csv')
+crowd_data_path = os.path.join(OUTPUT_DIR, 'crowd_data.csv')
+
+movement_data_file = open(movement_data_path, 'w') 
+crowd_data_file = open(crowd_data_path, 'w')
 # sd_violate_data_file = open('sd_violate_data.csv', 'w')
 # restricted_entry_data_file = open('restricted_entry_data.csv', 'w')
 
@@ -69,14 +87,14 @@ crowd_data_writer = csv.writer(crowd_data_file)
 # sd_violate_writer = csv.writer(sd_violate_data_file)
 # restricted_entry_data_writer = csv.writer(restricted_entry_data_file)
 
-if os.path.getsize('processed_data/movement_data.csv') == 0:
+if os.path.getsize(movement_data_path) == 0:
 	movement_data_writer.writerow(['Track ID', 'Entry time', 'Exit Time', 'Movement Tracks'])
-if os.path.getsize('processed_data/crowd_data.csv') == 0:
+if os.path.getsize(crowd_data_path) == 0:
 	crowd_data_writer.writerow(['Time', 'Human Count', 'Social Distance violate', 'Restricted Entry', 'Abnormal Activity'])
 
 START_TIME = time.time()
 
-processing_FPS = video_process(cap, FRAME_SIZE, net, ln, encoder, tracker, movement_data_writer, crowd_data_writer)
+processing_FPS = video_process(cap, FRAME_SIZE, net, ln, encoder, tracker, movement_data_writer, crowd_data_writer, OUTPUT_DIR)
 cv2.destroyAllWindows()
 movement_data_file.close()
 crowd_data_file.close()
@@ -109,6 +127,8 @@ video_data = {
 	"END_TIME": END_TIME.strftime("%d/%m/%Y, %H:%M:%S")
 }
 
-with open('processed_data/video_data.json', 'w') as video_data_file:
+video_data_path = os.path.join(OUTPUT_DIR, 'video_data.json')
+with open(video_data_path, 'w') as video_data_file:
 	json.dump(video_data, video_data_file)
 
+print(f"Analysis complete! Results saved to: {OUTPUT_DIR}")
