@@ -496,7 +496,7 @@ This project is licensed under the MIT License - see the [LICENSE](Backend/LICEN
 
 - **YOLOv4** - [AlexeyAB/darknet](https://github.com/AlexeyAB/darknet)
 - **Deep SORT** - [Python Lessons TensorFlow Implementation](https://github.com/pythonlessons/TensorFlow-2.x-YOLOv3)
-- **Original Crowd Analysis** - [lewjiayi/Crowd-Analysis](https://github.com/Abhishek-Mishra31/CU_Crowd_Analysis)
+- **Original Crowd Analysis** - [Abhishek-Mishra31/Crowd-Analysis](https://github.com/Abhishek-Mishra31/CU_Crowd_Analysis)
 
 ---
 
