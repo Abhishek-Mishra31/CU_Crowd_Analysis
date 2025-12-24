@@ -502,7 +502,7 @@ This project is licensed under the MIT License - see the [LICENSE](Backend/LICEN
 
 ## 📞 Contact
 
-**Built with ❤️ by CIPHER Team**
+**Built with ❤️ by CYPHER Team**
 
 For questions or discussions about this project, please open an issue on GitHub.
 
