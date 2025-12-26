@@ -494,15 +494,15 @@ This project is licensed under the MIT License - see the [LICENSE](Backend/LICEN
 
 ## 🙏 Acknowledgments
 
-- **YOLOv4** - [AlexeyAB/darknet](https://github.com/AlexeyAB/darknet)
-- **Deep SORT** - [Python Lessons TensorFlow Implementation](https://github.com/pythonlessons/TensorFlow-2.x-YOLOv3)
-- **Original Crowd Analysis** - [lewjiayi/Crowd-Analysis](https://github.com/lewjiayi/Crowd-Analysis)
+- **YOLOv4** - [Abhishek-Mishra31/backend/main.py](https://github.com/Abhishek-Mishra31/CU_Crowd_Analysis/blob/main/Backend/main.py)
+- **Deep SORT** - [Abhishek-Mishra31/deep_sort](https://github.com/Abhishek-Mishra31/CU_Crowd_Analysis/tree/main/Backend/deep_sort)
+- **Original Crowd Analysis** - [Abhishek-Mishra31/Crowd_Analysis](https://github.com/Abhishek-Mishra31/CU_Crowd_Analysis)
 
 ---
 
 ## 📞 Contact
 
-**Built with ❤️ by CIPHER Team**
+**Built with ❤️ by CYPHER Team**
 
 For questions or discussions about this project, please open an issue on GitHub.
 
