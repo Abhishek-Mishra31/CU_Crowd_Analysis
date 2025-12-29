@@ -77,4 +77,3 @@ def detect_human (net, ln, frame, encoder, tracker, time):
 				tracked_bboxes.append(track)
 
 	return [tracked_bboxes, expired]
-
