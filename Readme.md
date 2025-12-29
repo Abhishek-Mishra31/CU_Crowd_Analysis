@@ -10,7 +10,7 @@
 
 **Advanced AI-powered surveillance system for real-time crowd monitoring and analysis**
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [API](#-api-endpoints)
+[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-endpoints)
 
 </div>
 
