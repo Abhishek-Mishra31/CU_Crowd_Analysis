@@ -10,7 +10,7 @@
 
 **Advanced AI-powered surveillance system for real-time crowd monitoring and analysis**
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [API](#-api-endpoints)
+[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-endpoints)
 
 </div>
 
@@ -64,14 +64,14 @@ The **Crowd Analysis AI System** is a comprehensive surveillance solution design
 <td width="50%">
 
 **Optical Flow Visualization**
-![Movement Tracks](Backend/assets/optical%20flow.png)
+![Movement Tracks](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/movement_tracks.png)
 *Crowd movement patterns and trajectories*
 
 </td>
 <td width="50%">
 
 **Heatmap Analysis**
-![Heatmap](Backend/assets/heatmap.png)
+![Heatmap](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/heatmap.png)
 *Stationary location intensity mapping*
 
 </td>
@@ -80,14 +80,14 @@ The **Crowd Analysis AI System** is a comprehensive surveillance solution design
 <td width="50%">
 
 **Detection & Tracking**
-![Detection](Backend/assets/detection.png)
+![Detection](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/Boundry_Values.png)
 *Real-time person detection with bounding boxes*
 
 </td>
 <td width="50%">
 
 **Social Distance Monitoring**
-![Social Distance](Backend/assets/social%20distance.png)
+![Social Distance](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/Social_Distance_Analsis.png)
 *Violation detection and alerting*
 
 </td>
@@ -101,14 +101,14 @@ The **Crowd Analysis AI System** is a comprehensive surveillance solution design
 <td width="50%">
 
 **Crowd Data Summary**
-![Crowd Data](Backend/assets/crowd%20data.png)
+![Crowd Data](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/crowd_analysis.png)
 *Time-series analysis of crowd metrics*
 
 </td>
 <td width="50%">
 
 **Energy Distribution**
-![Energy Graph](Backend/assets/energy%20graph.png)
+![Energy Graph](Backend/processed_data/3503d1a8-4604-4f34-9339-802ebac47648/energy_distribution.png)
 *Abnormal activity detection graph*
 
 </td>
