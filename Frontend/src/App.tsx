@@ -234,13 +234,14 @@ function App() {
                   <p className="text-xl font-semibold mb-2 text-gray-800">Drop your video here</p>
                   <p className="text-gray-600 text-base">or click to browse files</p>
                 </div>
-                {/* comment added out for now  */}
+                
                 {/* <div className="flex justify-center gap-4 text-sm text-gray-500">
                   <span className="px-4 py-2 glass-card rounded-lg">MP4</span>
                   <span className="px-4 py-2 glass-card rounded-lg">AVI</span>
                   <span className="px-4 py-2 glass-card rounded-lg">MOV</span>
                   <span className="px-4 py-2 glass-card rounded-lg">MKV</span>
                 </div> */}
+                
               </div>
             </div>
           ) : (
