@@ -269,7 +269,7 @@ VIDEO_CONFIG = {
 - **Deep Learning:** TensorFlow 2.6.2, Keras 2.6.0
 - **Computer Vision:** OpenCV 4.5.4
 - **Object Detection:** YOLOv4-tiny (Darknet)
-- **Tracking:** Deep SORT with cosine metric learning
+- **Tracking:** Deep SORT with cosine metric learning with trained data
 - **Data Processing:** NumPy, Pandas, SciPy
 - **Visualization:** Matplotlib
 
